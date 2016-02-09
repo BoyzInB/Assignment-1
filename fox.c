@@ -79,6 +79,8 @@ LOCAL_MATRIX_T* local_B, LOCAL_MATRIX_T* local_C);
 MPI_Init(&argc, &argv);
 MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
 
+    
+/* Need to change the below. Want random matrices.*/
 Setup_grid(&grid);
 if (my_rank == 0) {
 printf("What's the order of the matrices?\n");
@@ -97,7 +99,8 @@ local_B = Local_matrix_allocate(n_bar);
 Order(local_B) = n_bar;
 Read_matrix("Enter B", local_B, &grid, n);
 Print_matrix("We read B =", local_B, &grid, n);
-
+    
+    
 Build_matrix_type(local_A);
 temp_mat = Local_matrix_allocate(n_bar);
 
@@ -106,6 +109,7 @@ Order(local_C) = n_bar;
 Fox(n, &grid, local_A, local_B, local_C);
 
 Print_matrix("The product is", local_C, &grid, n);
+
 
 Free_local_matrix(&local_A);
 Free_local_matrix(&local_B);
