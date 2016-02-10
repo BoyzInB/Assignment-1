@@ -23,6 +23,7 @@
 #include "mpi.h"
 #include <math.h>
 #include <stdlib.h>
+#include <time.h>
 
 typedef struct {
     int       p;         /* Total number of processes    */
