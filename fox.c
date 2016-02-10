@@ -24,6 +24,7 @@
 #include <math.h>
 #include <stdlib.h>
 
+
 typedef struct {
 int       p;         /* Total number of processes    */
 MPI_Comm  comm;      /* Communicator for entire grid */
@@ -89,6 +90,7 @@ scanf("%d", &n);
 
 MPI_Bcast(&n, 1, MPI_INT, 0, MPI_COMM_WORLD);
 n_bar = n/grid.q;
+    printf("%d",n_bar);
 
 local_A = Local_matrix_allocate(n_bar);
 Order(local_A) = n_bar;
