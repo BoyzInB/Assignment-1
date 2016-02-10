@@ -17,7 +17,6 @@
  *     1.  Assumes the number of processes is a perfect square
  *     2.  The array member of the matrices is statically allocated
  *
- * See Chap 7, pp. 113 & ff and pp. 125 & ff in PPMPI
  */
 #include <stdio.h>
 #include "mpi.h"
@@ -125,7 +124,7 @@ int main(int argc, char* argv[]) {
     Free_local_matrix(&local_B);
     Free_local_matrix(&local_C);
     
-    MPI_type_free(&local_matrix_mpi_t);
+    MPI_Type_free(&local_matrix_mpi_t);
     
     MPI_Finalize();
     return 0;
