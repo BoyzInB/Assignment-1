@@ -23,6 +23,7 @@
 #include "mpi.h"
 #include <math.h>
 #include <stdlib.h>
+#include <time.h>
 
 typedef struct {
 int       p;         /* Total number of processes    */
@@ -96,7 +97,9 @@ n_bar = n/grid.q;
 
 local_A = Local_matrix_allocate(n_bar);
 Order(local_A) = n_bar;
-Read_matrix("Generating and distributing A...", local_A, &grid, n);
+
+Read_matrix("Generating and distributing A...", local_A, &grid, n);  
+
 Print_matrix("Matrix A:", local_A, &grid, n);
 
 local_B = Local_matrix_allocate(n_bar);
@@ -104,7 +107,9 @@ Order(local_B) = n_bar;
 Read_matrix("Generating and distributing B...", local_B, &grid, n);
 Print_matrix("Matrix B:", local_B, &grid, n);
     
-    
+//    printf("HIT KOMMER JAG2");
+
+
 Build_matrix_type(local_A);
 temp_mat = Local_matrix_allocate(n_bar);
 
@@ -123,6 +128,8 @@ printf("The time it took was %f\n", endtime - starttime);
 Free_local_matrix(&local_A);
 Free_local_matrix(&local_B);
 Free_local_matrix(&local_C);
+
+MPI_Type_free(&local_matrix_mpi_t);
 
 MPI_Finalize();
 return 0;
@@ -188,6 +195,7 @@ int              n_bar;  /* n/sqrt(p)               */
 int              source;
 int              dest;
 MPI_Status       status;
+MPI_Request      request;
 
 n_bar = n/grid->q;
 Set_to_zero(local_C);
@@ -212,8 +220,14 @@ bcast_root, grid->row_comm);
 Local_matrix_multiply(temp_A, local_B,
 local_C);
 }
-MPI_Sendrecv_replace(local_B, 1, local_matrix_mpi_t,
-dest, 0, source, 0, grid->col_comm, &status);
+MPI_Isend(local_B, 1, local_matrix_mpi_t, dest, 0,
+              grid->col_comm, &request);
+MPI_Irecv(local_B, 1, local_matrix_mpi_t, source, 0,grid->col_comm, &request);
+MPI_Wait(&request,&status);
+
+
+/*MPI_Sendrecv_replace(local_B, 1, local_matrix_mpi_t,
+dest, 0, source, 0, grid->col_comm, &status);*/
 } /* for */
 
 } /* Fox */
@@ -254,6 +268,7 @@ int        dest;
 int        coords[2];
 float*     temp;
 MPI_Status status;
+int i = 0;
 
 if (grid->my_rank == 0) {
 temp = (float*) malloc(Order(local_A)*sizeof(float));
@@ -262,6 +277,7 @@ fflush(stdout);
 for (mat_row = 0;  mat_row < n; mat_row++) {
 grid_row = mat_row/Order(local_A);
 coords[0] = grid_row;
+
 for (grid_col = 0; grid_col < grid->q; grid_col++) {
 coords[1] = grid_col;
 MPI_Cart_rank(grid->comm, coords, &dest);
