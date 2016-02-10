@@ -202,6 +202,20 @@ void initialiseAB()
     }
 }
 
+/**
+ *  Fill the matrix with random values.
+ */
+/*
+void matrix_fill_random(matrix_t matrix)
+{
+    int i, j;
+    for(i = 0; i < matrix.n; i++) {
+        for(j = 0; j < (matrix.n + 10); j++) {
+            matrix.data[i][j] = (double)rand()/RAND_MAX*20 - 10;
+        }
+    }
+}*/
+
 
 int main(int argc, char *argv[])
 {
