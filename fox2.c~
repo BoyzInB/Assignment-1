@@ -11,7 +11,7 @@
 #include <math.h>
 #include <stdbool.h>
 
-#define ORDER 3
+#define ORDER 9
 
 
 typedef struct GridInfo {
