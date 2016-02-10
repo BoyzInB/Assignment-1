@@ -9,6 +9,7 @@
 #include<math.h>
 #include<stdio.h>
 #include"mpi.h"
+#include <matrix.h>
 
 #define N 9 /* dimension of the input matrix */
 
