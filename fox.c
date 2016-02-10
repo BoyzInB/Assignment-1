@@ -260,7 +260,7 @@ if (dest == 0) {
 for (mat_col = 0; mat_col < Order(local_A); mat_col++)
 //scanf("%f",
 //(local_A->entries)+mat_row*Order(local_A)+mat_col);
-//mat_row*Order[local_A->entries + mat_col] = 1;
+(local_A->entries)[mat_row*Order(local_A)][mat_col] = 1;
 } else {
 for(mat_col = 0; mat_col < Order(local_A); mat_col++)
 /*scanf("%f", temp + mat_col);*/ //Detta togs bort och ersattes med raden under.
