@@ -125,6 +125,8 @@ int main(int argc, char* argv[]) {
     Free_local_matrix(&local_B);
     Free_local_matrix(&local_C);
     
+    MPI_type_free(&local_matrix_mpi_t);
+    
     MPI_Finalize();
     return 0;
 }  /* main */
