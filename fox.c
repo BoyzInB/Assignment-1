@@ -71,8 +71,10 @@ int main(int argc, char* argv[]) {
     LOCAL_MATRIX_T*  local_C;
     int              n;
     int              n_bar;
-    double           startTime, stopTime;
+    double starttime, endtime;
     
+    srand(time(NULL));
+    starttime = MPI_Wtime();
     
     void Setup_grid(GRID_INFO_T*  grid);
     void Fox(int n, GRID_INFO_T* grid, LOCAL_MATRIX_T* local_A,
@@ -85,25 +87,22 @@ int main(int argc, char* argv[]) {
     /* Need to change the below. Want random matrices.*/
     Setup_grid(&grid);
     if (my_rank == 0) {
-        printf("What's the order of the matrices?\n");
-        scanf("%d", &n);
+        //printf("What's the order of the matrices?\n");
+        n = atoi(argv[1]);
     }
-    
-    if(my_rank == 0){startTime=MPI_Wtime();}
-    
     
     MPI_Bcast(&n, 1, MPI_INT, 0, MPI_COMM_WORLD);
     n_bar = n/grid.q;
     
     local_A = Local_matrix_allocate(n_bar);
     Order(local_A) = n_bar;
-    Read_matrix("Enter A", local_A, &grid, n);
-    Print_matrix("We read A =", local_A, &grid, n);
+    Read_matrix("Generating and distributing A...", local_A, &grid, n);
+    Print_matrix("Matrix A:", local_A, &grid, n);
     
     local_B = Local_matrix_allocate(n_bar);
     Order(local_B) = n_bar;
-    Read_matrix("Enter B", local_B, &grid, n);
-    Print_matrix("We read B =", local_B, &grid, n);
+    Read_matrix("Generating and distributing B...", local_B, &grid, n);
+    Print_matrix("Matrix B:", local_B, &grid, n);
     
     
     Build_matrix_type(local_A);
@@ -113,11 +112,12 @@ int main(int argc, char* argv[]) {
     Order(local_C) = n_bar;
     Fox(n, &grid, local_A, local_B, local_C);
     
-    if(my_rank == 0){
-        stopTime = MPI_Wtime();
-        printf("the time it took: %f \n", stopTime - startTime);
-    }
+    endtime   = MPI_Wtime();
+    
     Print_matrix("The product is", local_C, &grid, n);
+    
+    if(my_rank == 0)
+        printf("The time it took was %f\n", endtime - starttime);
     
     
     Free_local_matrix(&local_A);
@@ -257,7 +257,7 @@ void Read_matrix(
     
     if (grid->my_rank == 0) {
         temp = (float*) malloc(Order(local_A)*sizeof(float));
-        printf("%s\n", prompt);
+        //printf("%s\n", prompt);
         fflush(stdout);
         for (mat_row = 0;  mat_row < n; mat_row++) {
             grid_row = mat_row/Order(local_A);
@@ -267,11 +267,11 @@ void Read_matrix(
                 MPI_Cart_rank(grid->comm, coords, &dest);
                 if (dest == 0) {
                     for (mat_col = 0; mat_col < Order(local_A); mat_col++){
-                        (local_A->entries)[mat_row*Order(local_A) + mat_row] = (double)rand()/RAND_MAX*2 - 1;;
+                        (local_A->entries)[mat_row*Order(local_A) + mat_col] = (int)(rand()%10-5);
                     }
                 } else {
                     for(mat_col = 0; mat_col < Order(local_A); mat_col++)
-                        temp[mat_col] = (double)rand()/RAND_MAX*2 - 1;
+                        temp[mat_col] = (int) (rand()%10 -5);
                     MPI_Send(temp, Order(local_A), MPI_FLOAT, dest, 0,
                              grid->comm);
                 }
@@ -302,7 +302,7 @@ void Print_matrix(
     
     if (grid->my_rank == 0) {
         temp = (float*) malloc(Order(local_A)*sizeof(float));
-        printf("%s\n", title);
+        //printf("%s\n", title);
         for (mat_row = 0;  mat_row < n; mat_row++) {
             grid_row = mat_row/Order(local_A);
             coords[0] = grid_row;
@@ -310,16 +310,16 @@ void Print_matrix(
                 coords[1] = grid_col;
                 MPI_Cart_rank(grid->comm, coords, &source);
                 if (source == 0) {
-                    for(mat_col = 0; mat_col < Order(local_A); mat_col++)
-                        //printf("%4.1f ", Entry(local_A, mat_row, mat_col));
-                        } else {
-                            MPI_Recv(temp, Order(local_A), MPI_FLOAT, source, 0,
-                                     grid->comm, &status);
-                            for(mat_col = 0; mat_col < Order(local_A); mat_col++)
-                                //printf("%4.1f ", temp[mat_col]);
-                                }
+                    /*for(mat_col = 0; mat_col < Order(local_A); mat_col++)
+                     printf("%4.1f ", Entry(local_A, mat_row, mat_col));*/
+                } else {
+                    MPI_Recv(temp, Order(local_A), MPI_FLOAT, source, 0,
+                             grid->comm, &status);
+                    /*for(mat_col = 0; mat_col < Order(local_A); mat_col++)
+                     printf("%4.1f ", temp[mat_col]);*/
+                }
             }
-            printf("\n");
+            //printf("\n");
         }
         free(temp);
     } else {
